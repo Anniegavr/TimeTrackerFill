@@ -7,10 +7,8 @@ def enter_daily_tasks(login, password):
         context = browser.new_context()
         page = context.new_page()
 
-        # Navigate to Anuko Timetracker
         page.goto("https://timetracker.inthergroup.com")
 
-        # Login
         page.fill('input[name="login"]', login)
         page.fill('input[name="password"]', password)
         page.click('input[name="btn_login"]')
