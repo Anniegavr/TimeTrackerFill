@@ -1,6 +1,54 @@
+from getpass import getpass
+
 from playwright.sync_api import sync_playwright
 import time
 
+def read_notes():
+    try:
+        with open("notes.txt", "r") as file:
+            return file.readlines()
+    except FileNotFoundError:
+        return []
+
+def write_notes(notes):
+    with open("notes.txt", "w") as file:
+        file.writelines(notes)
+
+def search_note_in_file(note):
+    notes = read_notes()
+    for line in notes:
+        if note in line:
+            return line.strip()
+    return None
+
+def add_note_to_file(new_note):
+    notes = read_notes()
+    notes.append(new_note + "\n")
+    write_notes(notes)
+
+def delete_note_from_file(note):
+    notes = read_notes()
+    updated_notes = [line for line in notes if note not in line]
+    write_notes(updated_notes)
+
+def input_note():
+    while True:
+        note = input("Enter a piece of the note: ")
+        found_note = search_note_in_file(note)
+        if found_note:
+            print("Note found:", found_note)
+            delete_option = input("Do you want to delete this note from notes.txt? (yes/no): ")
+            if delete_option.lower() == "yes":
+                delete_note_from_file(found_note)
+                print("Note deleted from notes.txt.")
+            return found_note
+        else:
+            print("This note was not found in notes.txt.")
+            add_option = input("Do you want to add this note to notes.txt? (yes/no): ")
+            if add_option.lower() == "yes":
+                add_note_to_file(note)
+                print("Note added to notes.txt.")
+                return note
 def enter_daily_tasks(login, password):
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
@@ -66,7 +114,7 @@ def enter_daily_tasks(login, password):
         duration = input("Enter the duration of the task (HH:MM): ")
         page.fill('input[name="duration"]', duration)
 
-        note = input("Enter a note for the task: ")
+        note = input_note()
         page.fill('textarea[name="note"]', note)
 
         page.click('input[name="btn_submit"]')
